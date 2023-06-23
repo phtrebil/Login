@@ -8,6 +8,10 @@ android {
     namespace 'com.example.login'
     compileSdk 33
 
+    viewBinding {
+        enabled = true
+    }
+
     defaultConfig {
         applicationId "com.example.login"
         minSdk 23

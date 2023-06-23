@@ -1,12 +1,15 @@
 package com.example.login.model
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
+import java.util.*
 
 @Entity
 class Usuario(
-    private val usuario: String,
-    private val nome: String,
-    private val email: String,
-    private val senha: String
-) {
-}
+    @PrimaryKey
+    val id: String = UUID.randomUUID().toString(),
+    val usuario: String,
+    val nome: String,
+    val email: String,
+    val senha: String
+)
