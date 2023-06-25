@@ -9,7 +9,8 @@ import com.example.login.model.Usuario
 
 @Database(
     version = 1,
-    entities = [Usuario::class]
+    entities = [Usuario::class],
+    exportSchema = true
 )
 abstract class AppDatabase: RoomDatabase() {
 

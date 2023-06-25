@@ -1,20 +1,24 @@
 package com.example.login
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.login.database.AppDatabase
 import com.example.login.databinding.ActivityCadastroBinding
 import com.example.login.model.Usuario
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class CadastroActivity : AppCompatActivity() {
 
-    private val binding by lazy{
+    // Inicializa o binding usando lazy para inflar o layout
+    private val binding by lazy {
         ActivityCadastroBinding.inflate(layoutInflater)
     }
 
+    // Inicializa o banco de dados usando lazy para evitar a inicialização desnecessária
     private val dataBase by lazy {
         AppDatabase.instancia(this).userDao()
     }
@@ -23,33 +27,54 @@ class CadastroActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        // Configura o botão de cadastro para chamar a função salvaUsuario()
         configuraBotaoDeCadastro()
-
-
     }
 
     private fun configuraBotaoDeCadastro() {
         binding.buttonCadastrar.setOnClickListener {
-            lifecycleScope.launch(Dispatchers.IO) {
-                dataBase.insertAll(salvaUsuario())
-            }
-            finish()
+            salvaUsuario()
         }
     }
 
-    private fun salvaUsuario(): Usuario{
+    private fun salvaUsuario(): Boolean {
         val nome = binding.editTextNome.text.toString()
         val user = binding.editTextNomeUsuario.text.toString()
         val senha = binding.editTextSenha.text.toString()
         val email = binding.editTextEmail.text.toString()
 
-        return Usuario(
-            nome = nome,
-            usuario = user,
-            email = email,
-            senha = senha
-        )
+        var usuarioCriado = false // Variável para armazenar o resultado
 
+        // Inicia uma CoroutineScope para executar a tarefa assíncrona
+        lifecycleScope.launch {
+            // Acessa o banco de dados em uma thread de E/S para buscar o usuário
+            val usuarioExistente = withContext(Dispatchers.IO) {
+                dataBase.getUser(user)
+            }
 
+            // Verifica se o usuário já existe
+            if (usuarioExistente != null) {
+                // Exibe uma mensagem de erro na thread principal caso o usuário já exista
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@CadastroActivity, "Usuário já existe", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            } else {
+                // Cria um novo objeto de usuário
+                val novoUsuario = Usuario(
+                    nome = nome, usuario = user, senha = senha, email = email
+                )
+
+                // Insere o novo usuário no banco de dados em uma thread de E/S
+                withContext(Dispatchers.IO) {
+                    dataBase.insertAll(novoUsuario)
+                }
+
+                // Define a variável como true se o usuário for criado com sucesso
+                usuarioCriado = true
+            }
+        }
+
+        return usuarioCriado
     }
 }
