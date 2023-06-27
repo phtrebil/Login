@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Toast
 import com.example.login.database.AppDatabase
 import com.example.login.databinding.ActivityMainBinding
+import com.example.login.model.Usuario
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,6 +23,8 @@ class LoginActivity : AppCompatActivity() {
     private val dataBase by lazy {
         AppDatabase.instancia(this).userDao()
     }
+
+    private var usuarioEncontrado: Usuario? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,13 +51,18 @@ class LoginActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.Main).launch {
             try {
                 // Acessa o banco de dados em uma thread de E/S para buscar o usuário
-                val usuarioEncontrado = withContext(Dispatchers.IO) {
+                usuarioEncontrado = withContext(Dispatchers.IO) {
                     dataBase.getUser(user)
                 }
 
                 // Verifica se o usuário foi encontrado e a senha está correta
-                if (usuarioEncontrado != null && usuarioEncontrado.senha == senha) {
-                    Toast.makeText(this@LoginActivity, "Login efetuado com sucesso", Toast.LENGTH_SHORT).show()
+                if (usuarioEncontrado != null && usuarioEncontrado!!.senha == senha) {
+                    Toast.makeText(
+                        this@LoginActivity,
+                        "Login efetuado com sucesso",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    vaiParaDetalhes()
                 } else {
                     // Lança uma exceção caso o login ou senha estejam incorretos
                     throw Exception("Login ou senha incorretos")
@@ -66,6 +74,13 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    private fun vaiParaDetalhes() {
+        val intent = Intent(this, DetalhesActivity::class.java).apply {
+            putExtra("user",usuarioEncontrado?.usuario)
+        }
+        startActivity(intent)
+    }
+
     private fun configuraTextoNaoTemCadastro() {
         binding.textViewNaoCadastrado.setOnClickListener {
             // Redireciona para a tela de cadastro ao clicar no texto
@@ -74,5 +89,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 }
+
 
 
