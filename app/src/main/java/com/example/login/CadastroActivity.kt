@@ -1,5 +1,6 @@
 package com.example.login
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -37,13 +38,12 @@ class CadastroActivity : AppCompatActivity() {
         }
     }
 
-    private fun salvaUsuario(): Boolean {
+    private fun salvaUsuario() {
         val nome = binding.editTextNome.text.toString()
         val user = binding.editTextNomeUsuario.text.toString()
         val senha = binding.editTextSenha.text.toString()
         val email = binding.editTextEmail.text.toString()
 
-        var usuarioCriado = false // Variável para armazenar o resultado
 
         // Inicia uma CoroutineScope para executar a tarefa assíncrona
         lifecycleScope.launch {
@@ -70,11 +70,14 @@ class CadastroActivity : AppCompatActivity() {
                     dataBase.insertAll(novoUsuario)
                 }
 
-                // Define a variável como true se o usuário for criado com sucesso
-                usuarioCriado = true
+                // Redireciona para a tela de login apenas se o usuário for criado com sucesso
+                iniciarTelaLogin()
             }
         }
-
-        return usuarioCriado
+    }
+    private fun iniciarTelaLogin() {
+        val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
+        finish() // Finaliza a atividade atual para que o usuário não possa voltar para a tela de cadastro pressionando o botão Voltar
     }
 }

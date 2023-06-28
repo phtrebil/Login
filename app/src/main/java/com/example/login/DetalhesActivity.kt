@@ -13,16 +13,16 @@ import kotlinx.coroutines.withContext
 class DetalhesActivity : AppCompatActivity() {
 
     // Inicialização tardia do objeto binding usando a propriedade by lazy
-    val binding by lazy {
+    private val binding by lazy {
         ActivityDetalhesBinding.inflate(layoutInflater)
     }
 
     // Inicialização tardia do objeto do banco de dados usando a propriedade by lazy
-    val dataBase by lazy {
+    private val dataBase by lazy {
         AppDatabase.instancia(this).userDao()
     }
 
-    var user: Usuario? = null
+    private var user: Usuario? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
