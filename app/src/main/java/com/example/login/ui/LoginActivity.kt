@@ -3,6 +3,7 @@ package com.example.login.ui
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.widget.Toast
 import com.example.login.database.AppDatabase
 import com.example.login.databinding.ActivityMainBinding
@@ -30,11 +31,29 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        // Verifica se o usuário já efetuou o Login e leva direto para tela de detalhes
+        verificaLogin()
+
+        // Verifica se é um logoff
+        val logoff = intent.getBooleanExtra("logoff", false)
+        if (logoff) {
+            atualizarEstadoLogin(false)
+        }
+
         // Configura o texto para redirecionar para a tela de cadastro
         configuraTextoNaoTemCadastro()
 
         // Configura o botão de entrar para validar a senha
         configuraBotaoEntrar()
+    }
+
+    private fun verificaLogin() {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val logado = sharedPreferences.getBoolean("logado", false)
+
+        if (logado) {
+            vaiParaDetalhes()
+        }
     }
 
     private fun configuraBotaoEntrar() {
@@ -43,6 +62,12 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    private fun atualizarEstadoLogin(logado: Boolean) {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val editor = sharedPreferences.edit()
+        editor.putBoolean("logado", logado)
+        editor.apply()
+    }
     private fun validaSenha() {
         val user = binding.editTextLogin.text.toString()
         val senha = binding.editTextSenha.text.toString()
@@ -62,6 +87,15 @@ class LoginActivity : AppCompatActivity() {
                         "Login efetuado com sucesso",
                         Toast.LENGTH_SHORT
                     ).show()
+
+                    //salva informações sobre o login e usuario
+
+                    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this@LoginActivity)
+                    val editor = sharedPreferences.edit()
+                    editor.putBoolean("logado", true)
+                    editor.putString("user", usuarioEncontrado?.usuario)
+                    editor.apply()
+
                     vaiParaDetalhes()
                 } else {
                     // Lança uma exceção caso o login ou senha estejam incorretos
@@ -75,9 +109,8 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun vaiParaDetalhes() {
-        val intent = Intent(this, DetalhesActivity::class.java).apply {
-            putExtra("user",usuarioEncontrado?.usuario)
-        }
+
+        val intent = Intent(this, DetalhesActivity::class.java)
         startActivity(intent)
     }
 
