@@ -31,20 +31,24 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        // Verifica se é um logoff
+        verificaLogOff()
+
         // Verifica se o usuário já efetuou o Login e leva direto para tela de detalhes
         verificaLogin()
-
-        // Verifica se é um logoff
-        val logoff = intent.getBooleanExtra("logoff", false)
-        if (logoff) {
-            atualizarEstadoLogin(false)
-        }
 
         // Configura o texto para redirecionar para a tela de cadastro
         configuraTextoNaoTemCadastro()
 
         // Configura o botão de entrar para validar a senha
         configuraBotaoEntrar()
+    }
+
+    private fun verificaLogOff() {
+        val logoff = intent.getBooleanExtra("logoff", false)
+        if (logoff) {
+            atualizarEstadoLogin(false)
+        }
     }
 
     private fun verificaLogin() {
@@ -90,11 +94,7 @@ class LoginActivity : AppCompatActivity() {
 
                     //salva informações sobre o login e usuario
 
-                    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this@LoginActivity)
-                    val editor = sharedPreferences.edit()
-                    editor.putBoolean("logado", true)
-                    editor.putString("user", usuarioEncontrado?.usuario)
-                    editor.apply()
+                    salvaLogin()
 
                     vaiParaDetalhes()
                 } else {
@@ -106,6 +106,14 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this@LoginActivity, e.message, Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun salvaLogin() {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this@LoginActivity)
+        val editor = sharedPreferences.edit()
+        editor.putBoolean("logado", true)
+        editor.putString("user", usuarioEncontrado?.usuario)
+        editor.apply()
     }
 
     private fun vaiParaDetalhes() {

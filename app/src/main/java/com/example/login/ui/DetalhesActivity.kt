@@ -34,6 +34,10 @@ class DetalhesActivity : AppCompatActivity() {
 
         recebeInformacaoDeLogin()
 
+        configuraBotaoLogOff()
+    }
+
+    private fun configuraBotaoLogOff() {
         binding.logoff.setOnClickListener {
             realizarLogoff()
         }
@@ -49,21 +53,28 @@ class DetalhesActivity : AppCompatActivity() {
     }
 
     private fun recebeInformacaoDeLogin() {
+        // Obtém uma instância do SharedPreferences padrão
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+
+        // Obtém o usuário salvo no SharedPreferences com a chave "user"
         val usuarioRecebido = sharedPreferences.getString("user", null)
 
+        // Verifica se o usuário recebido não está vazio ou nulo
         if (!usuarioRecebido.isNullOrEmpty()) {
+            // Inicia uma CoroutineScope na thread IO
             CoroutineScope(Dispatchers.IO).launch {
+                // Acessa o banco de dados para obter informações do usuário usando a função getUser()
                 user = withContext(Dispatchers.IO) {
                     dataBase.getUser(usuarioRecebido)
                 }
+
+                // Volta para a thread principal para exibir as informações
                 withContext(Dispatchers.Main) {
                     mostraInformacao()
                 }
             }
         }
     }
-
 
     // Função para exibir as informações do usuário na interface
     private fun mostraInformacao() {
